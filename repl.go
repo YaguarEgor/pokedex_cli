@@ -13,7 +13,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(conf *Config) error
+	callback    func(conf *Config, args ...string) error
 }
 
 func startRepl() {
@@ -22,6 +22,7 @@ func startRepl() {
 		NextLocation: nil,
 		PreviousLocation: nil,
 		cache: caching.NewCache(time.Second*10),
+		pokedex: map[string]Pokemon{},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -42,7 +43,11 @@ func startRepl() {
 			fmt.Println("Unknown command")
 			continue
 		}
-		command.callback(&config)
+		args := []string{}
+		if len(words) > 1 {
+			args = words[1:]
+		}
+		command.callback(&config, args...)
 	}
 }
 
@@ -77,6 +82,21 @@ func getAllCommands() map[string]cliCommand {
 			name: "Explore",
 			description: "Get all Pokemons here",
 			callback: commandExplore,
+		},
+		"catch": {
+			name: "Catch",
+			description: "Catch one Pokemon",
+			callback: commandCatch,
+		},
+		"inspect": {
+			name: "Inspect",
+			description: "Study specs of pokemon if it's caught",
+			callback: commandInspect,
+		},
+		"pokedex": {
+			name: "Pokedex",
+			description: "List all pokedex from your pokedex",
+			callback: commandPokedex,
 		},
 	}
 }
